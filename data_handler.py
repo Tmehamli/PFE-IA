@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-import pandas as pd
+
 import numpy as np
 
 __all__ = ['DataHandler']
@@ -78,28 +78,20 @@ class DataHandler(object):
         self._loss_function = None
         self._folds = None
 
-        self._data_file = os.path.join(data_path, 'a1_raw.csv')
-#        self._fold_file = os.path.join(data_path, 'fold.npz')
+        self._data_file = os.path.join(data_path, 'data.npz')
+        self._fold_file = os.path.join(data_path, 'fold.npz')
         self._load_data(label_name)
         self._max_steps = max_steps
         self._max_timestamp = max_timestamp
 
     def _load_data(self, label_name):
-#        raise ValueError()
         if not os.path.exists(self._data_file):
             raise ValueError('Data file does not exist...')
-#        if not os.path.exists(self._fold_file):
+        if not os.path.exists(self._fold_file):
             raise ValueError('Fold file does not exist...')
         # Get input, masking, timestamp, label_$label_name$, fold, mean, std, etc.
-        df_data = pd.read_csv(self._data_file, sep=',')
-        print(df_data)
-        print(self._data_file)
-        df_data.to_pickle("./"+self._data_file[:-4]+".pkl")
-
-        data = np.load("./"+self._data_file[:-4]+".pkl", allow_pickle=True)
-        print(data)
-        #data = np.load(self._data_file, allow_pickle=True)
-#        fold = np.load(self._fold_file)
+        data = np.load(self._data_file)
+        fold = np.load(self._fold_file)
         self._data = {}
         for s in ['input', 'masking', 'timestamp']:
             self._data[s] = data[s]
