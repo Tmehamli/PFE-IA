@@ -78,14 +78,15 @@ class DataHandler(object):
         self._loss_function = None
         self._folds = None
 
-        self._data_file = os.path.join(data_path, 'a1_raw.csv')
-#        self._fold_file = os.path.join(data_path, 'fold.npz')
+        self._data_file = os.path.join(data_path)
+        self._fold_file = os.path.join(data_path)
         self._load_data(label_name)
         self._max_steps = max_steps
         self._max_timestamp = max_timestamp
 
     def _load_data(self, label_name):
 #        raise ValueError()
+        print(self._data_file)
         if not os.path.exists(self._data_file):
             raise ValueError('Data file does not exist...')
 #        if not os.path.exists(self._fold_file):
@@ -104,8 +105,8 @@ class DataHandler(object):
         for s in ['input', 'masking', 'timestamp']:
             self._data[s] = data[s]
         self._data['label'] = data['label_' + label_name]
-        for s in ['fold', 'mean', 'std']:
-            self._data[s] = fold[s + '_' + label_name]
+#        for s in ['fold', 'mean', 'std']:
+#            self._data[s] = fold[s + '_' + label_name]
 
         self._input_dim = self._data['input'][0].shape[-1]
         if self._data['label'].ndim == 1:
