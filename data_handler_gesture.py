@@ -1,9 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-import pandas as pd
+
 import numpy as np
-from Prepare_Gesture_Data import prepare_data
+
 __all__ = ['DataHandler']
 
 
@@ -78,8 +78,8 @@ class DataHandler(object):
         self._loss_function = None
         self._folds = None
 
-        self._data_file = os.path.join(data_path)
-        self._fold_file = os.path.join(data_path)
+        self._data_file = os.path.join(data_path, 'data.npz')
+        self._fold_file = os.path.join(data_path, 'fold.npz')
         self._load_data(label_name)
         self._max_steps = max_steps
         self._max_timestamp = max_timestamp
@@ -87,31 +87,17 @@ class DataHandler(object):
     def _load_data(self, label_name):
         if not os.path.exists(self._data_file):
             raise ValueError('Data file does not exist...')
-        ## Don't know utility of fold_file yet
-        #if not os.path.exists(self._fold_file):
-            #raise ValueError('Fold file does not exist...')
+        if not os.path.exists(self._fold_file):
+            raise ValueError('Fold file does not exist...')
         # Get input, masking, timestamp, label_$label_name$, fold, mean, std, etc.
-        ## Creat the pkl file from csv
-        if not os.path.exists("./"+self._data_file[:-4]+".pkl"):
-            try:
-                prepare_data()
-            except:
-                raise Error('Issue with prepare_data()')
-            #df_data = pd.read_csv(self._data_file, sep=',')
-            #print(df_data)
-            #print(self._data_file)
-            #df_data.to_pickle("./"+self._data_file[:-4]+".pkl")
-
-        data = np.load("./"+self._data_file[:-4]+".pkl", allow_pickle=True)
-        #print(data)
-        #data = np.load(self._data_file, allow_pickle=True)
-        #fold = np.load(self._fold_file)
+        data = np.load(self._data_file)
+        fold = np.load(self._fold_file)
         self._data = {}
         for s in ['input', 'masking', 'timestamp']:
             self._data[s] = data[s]
         self._data['label'] = data['label_' + label_name]
-        #for s in ['fold', 'mean', 'std']:
-            #self._data[s] = fold[s + '_' + label_name]
+        for s in ['fold']#, 'mean', 'std']:
+            self._data[s] = fold[s + '_' + label_name]
 
         self._input_dim = self._data['input'][0].shape[-1]
         if self._data['label'].ndim == 1:
@@ -128,8 +114,8 @@ class DataHandler(object):
         fold = np.copy(self._data['fold'][i_fold][i])
         # The mean / std used in validation/test fold should also be from
         # the training fold.
-        mean = self._data['mean'][i_fold][0]
-        std = self._data['std'][i_fold][0]
+        #mean = self._data['mean'][i_fold][0]
+        #std = self._data['std'][i_fold][0]
         folds = len(fold)
 
         def _generator():
@@ -141,7 +127,7 @@ class DataHandler(object):
                     batch_fold = fold[batch_from:batch_from + batch_size]
                     inputs = [self._data[s][batch_fold] for s
                               in ['input', 'masking', 'timestamp']]
-                    inputs[0] = _rescale(inputs[0], mean, std)
+                    #inputs[0] = _rescale(inputs[0], mean, std)
                     lens = _filter(inputs[2], self._max_timestamp, self._max_steps)
                     inputs = [_pad(x, lens) for x in inputs]
                     targets = self._data['label'][batch_fold]
