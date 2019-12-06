@@ -18,6 +18,11 @@ def _filter(ts, max_timestamp=None, max_timesteps=None):
         A np.array of n Integers. Its i-th element (x_i) indicates that
             we will take the first x_i numbers from i-th data sample. 
     """
+    print("\nts.shape")
+    print(ts.shape)
+    print(ts)
+    print("max_timestamp:"+str(max_timestamp))
+    print("max_timesteps:"+str(max_timesteps))
     if max_timestamp is None:
         ret = np.asarray([len(tt) for tt in ts])
     else:
@@ -60,6 +65,12 @@ def _rescale(x, mean, std):
     """
     return np.asarray([(xx - mean[np.newaxis, :]) / std[np.newaxis, :] for xx in x])
 
+def _new_rescale(x, mean, std):
+    #print("######## _new_rescale ########\n")
+    #print("x.shape:\n"+str(x.shape))
+    #print("mean:\n"+str(len(mean)))
+    #print("std:\n"+std)
+    return [(x[:,i]-mean[i])/std[i] for i in range(x.shape[1])]
 
 class DataHandler(object):
     """Load `data.npz` and `fold.npz` for model training and testing.
@@ -77,12 +88,13 @@ class DataHandler(object):
         self._output_activation = None
         self._loss_function = None
         self._folds = None
-
+    
         self._data_file = os.path.join(data_path, 'data.npz')
         self._fold_file = os.path.join(data_path, 'fold.npz')
         self._load_data(label_name)
         self._max_steps = max_steps
         self._max_timestamp = max_timestamp
+        
 
     def _load_data(self, label_name):
         if not os.path.exists(self._data_file):
@@ -90,13 +102,13 @@ class DataHandler(object):
         if not os.path.exists(self._fold_file):
             raise ValueError('Fold file does not exist...')
         # Get input, masking, timestamp, label_$label_name$, fold, mean, std, etc.
-        data = np.load(self._data_file)
-        fold = np.load(self._fold_file)
+        data = np.load(self._data_file, allow_pickle=True)
+        fold = np.load(self._fold_file, allow_pickle=True)
         self._data = {}
         for s in ['input', 'masking', 'timestamp']:
             self._data[s] = data[s]
         self._data['label'] = data['label_' + label_name]
-        for s in ['fold']#, 'mean', 'std']:
+        for s in ['fold', 'mean', 'std']:
             self._data[s] = fold[s + '_' + label_name]
 
         self._input_dim = self._data['input'][0].shape[-1]
@@ -107,17 +119,17 @@ class DataHandler(object):
         self._output_activation = 'sigmoid'
         self._loss_function = 'binary_crossentropy'
         self._folds = self._data['fold'].shape[0]
-
+        
     def _get_generator(self, i, i_fold, shuffle, batch_size, return_targets):
         if not return_targets and shuffle:
             raise ValueError('Do not shuffle when targets are not returned.')
         fold = np.copy(self._data['fold'][i_fold][i])
         # The mean / std used in validation/test fold should also be from
         # the training fold.
-        #mean = self._data['mean'][i_fold][0]
-        #std = self._data['std'][i_fold][0]
+        mean = self._data['mean'][i_fold][0]
+        std = self._data['std'][i_fold][0]
         folds = len(fold)
-
+        
         def _generator():
             while True:
                 if shuffle:
@@ -128,10 +140,11 @@ class DataHandler(object):
                     inputs = [self._data[s][batch_fold] for s
                               in ['input', 'masking', 'timestamp']]
                     #inputs[0] = _rescale(inputs[0], mean, std)
-                    lens = _filter(inputs[2], self._max_timestamp, self._max_steps)
-                    inputs = [_pad(x, lens) for x in inputs]
+                    inputs[0] = _new_rescale(inputs[0], mean, std)                    
+                    #lens = _filter(inputs[2], self._max_timestamp, self._max_steps)
+                    #inputs = [_pad(x, lens) for x in inputs]
                     targets = self._data['label'][batch_fold]
-                    yield (inputs, targets)
+                    #yield (inputs, targets)
                     batch_from += batch_size
                     print('.', end='')
         # end of `_generator()`
