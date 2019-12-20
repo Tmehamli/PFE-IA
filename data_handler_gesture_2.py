@@ -26,25 +26,7 @@ def _filter(ts, max_timestamp=None, max_timesteps=None):
         ret = np.minimum(ret, max_timesteps)
     return ret
 
-def _new_filter(ts, max_timestamp=None, max_timesteps=None):
-    """
-    Args:
-        ts: A np.array of timestamp with shape (t_i,).
-        max_timestamp: an Integer > 0 or None.
-        max_timesteps: an Integer > 0 or None.
 
-    Returns:
-        A Integers i indicates that
-            we will take the first i numbers from i-th data sample. 
-    """
-    if max_timestamp is None:
-        ret = ts.shape[0]
-    else:
-        ret = np.sum(ts - ts[0] <= max_timestamp)
-    if max_timesteps is not None:
-        ret = np.minimum(ret, max_timesteps)
-    #print("ret",ret)
-    return ret
 def _pad(x, lens):
     """
     Args:
@@ -66,31 +48,6 @@ def _pad(x, lens):
             ret[i, :lens[i]] = xx[:lens[i]]
     return ret
 
-def _new_pad(x, lens):
-    """
-    Args:
-        x: A np.array of n np.array with shape (t_i, d).
-        lens: A Integers > 0.
-
-    Returns:
-        A np.array of shape (n, d)
-    """
-    n = len(x)
-    t = lens
-    d = 1 if x.ndim == 1 else x.shape[1]
-    ret = np.zeros([n, t, d], dtype=float)
-    print("x.shape:",x.shape,"|ret.shape:", ret.shape,"\n")
-    if x.ndim == 1:
-        #for timestamp
-        for i, xx in enumerate(x):
-            ret[:lens, i] = xx[:lens]
-    else:
-        #for inputs and masking
-        for i, xx in enumerate(x):
-            ret[:lens, i] = xx[:lens, np.newaxis]
-    #print("x:",x,"\nret:",ret)
-    return ret
-
 def _rescale(x, mean, std):
     """
     Args:
@@ -101,10 +58,8 @@ def _rescale(x, mean, std):
     Returns:
         Same shape as x with rescaled values.
     """
-    ret = (x - mean[np.newaxis, :]) / std[np.newaxis, :]
-    #ret = np.asarray([(xx - mean[np.newaxis, :]) / std[np.newaxis, :] for xx in x])
-    assert x.shape == ret.shape
-    return ret
+    return np.asarray([(xx - mean[np.newaxis, :]) / std[np.newaxis, :] for xx in x])
+
 
 class DataHandler(object):
     """Load `data.npz` and `fold.npz` for model training and testing.
@@ -122,13 +77,12 @@ class DataHandler(object):
         self._output_activation = None
         self._loss_function = None
         self._folds = None
-    
+
         self._data_file = os.path.join(data_path, 'data.npz')
         self._fold_file = os.path.join(data_path, 'fold.npz')
         self._load_data(label_name)
         self._max_steps = max_steps
         self._max_timestamp = max_timestamp
-        
 
     def _load_data(self, label_name):
         if not os.path.exists(self._data_file):
@@ -153,7 +107,7 @@ class DataHandler(object):
         self._output_activation = 'sigmoid'
         self._loss_function = 'binary_crossentropy'
         self._folds = self._data['fold'].shape[0]
-        
+
     def _get_generator(self, i, i_fold, shuffle, batch_size, return_targets):
         if not return_targets and shuffle:
             raise ValueError('Do not shuffle when targets are not returned.')
@@ -163,7 +117,7 @@ class DataHandler(object):
         mean = self._data['mean'][i_fold][0]
         std = self._data['std'][i_fold][0]
         folds = len(fold)
-        
+
         def _generator():
             while True:
                 if shuffle:
@@ -173,11 +127,10 @@ class DataHandler(object):
                     batch_fold = fold[batch_from:batch_from + batch_size]
                     inputs = [self._data[s][batch_fold] for s
                               in ['input', 'masking', 'timestamp']]
-                    inputs[0] = _rescale(inputs[0], mean, std)                  
-                    lens = _new_filter(inputs[2], self._max_timestamp, self._max_steps)
-                    #inputs = [_new_pad(x, lens) for x in inputs]
+                    inputs[0] = _rescale(inputs[0], mean, std)
+                    lens = _filter(inputs[2], self._max_timestamp, self._max_steps)
+                    inputs = [_pad(x, lens) for x in inputs]
                     targets = self._data['label'][batch_fold]
-                    print("inputs[0].shape:",inputs[0].shape)
                     yield (inputs, targets)
                     batch_from += batch_size
                     print('.', end='')
@@ -193,7 +146,7 @@ class DataHandler(object):
         return _generator()
 
     def training_generator(self, i_fold, batch_size):
-        return self._get_generator(i=0, i_fold=i_fold, shuffle=False,
+        return self._get_generator(i=0, i_fold=i_fold, shuffle=True,
                                    batch_size=batch_size, return_targets=True)
 
     def validation_generator(self, i_fold, batch_size):
