@@ -80,6 +80,7 @@ class DataHandler(object):
 
         self._data_file = os.path.join(data_path, 'data.npz')
         self._fold_file = os.path.join(data_path, 'fold.npz')
+        
         self._load_data(label_name)
         self._max_steps = max_steps
         self._max_timestamp = max_timestamp
@@ -98,7 +99,7 @@ class DataHandler(object):
         self._data['label'] = data['label_' + label_name]
         for s in ['fold', 'mean', 'std']:
             self._data[s] = fold[s + '_' + label_name]
-
+        print("self._data['fold'].shape:{}".format(self._data['fold'].shape))
         self._input_dim = self._data['input'][0].shape[-1]
         if self._data['label'].ndim == 1:
             self._output_dim = 1
@@ -111,7 +112,7 @@ class DataHandler(object):
     def _get_generator(self, i, i_fold, shuffle, batch_size, return_targets):
         if not return_targets and shuffle:
             raise ValueError('Do not shuffle when targets are not returned.')
-        fold = np.copy(self._data['fold'][i_fold][i])
+        fold = np.copy(self._data['fold'][:][i_fold][i])
         # The mean / std used in validation/test fold should also be from
         # the training fold.
         mean = self._data['mean'][i_fold][0]
@@ -125,6 +126,7 @@ class DataHandler(object):
                 batch_from = 0
                 while batch_from < folds:
                     batch_fold = fold[batch_from:batch_from + batch_size]
+                    print('i:{} , i_fold:{}, fold[0].shape{}'.format(i, i_fold, fold[0].shape))
                     inputs = [self._data[s][batch_fold] for s
                               in ['input', 'masking', 'timestamp']]
                     inputs[0] = _rescale(inputs[0], mean, std)
