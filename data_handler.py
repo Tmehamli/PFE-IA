@@ -18,6 +18,7 @@ def _filter(ts, max_timestamp=None, max_timesteps=None):
         A np.array of n Integers. Its i-th element (x_i) indicates that
             we will take the first x_i numbers from i-th data sample. 
     """
+    #print("len(ts)",len(ts),"ts",ts)
     if max_timestamp is None:
         ret = np.asarray([len(tt) for tt in ts])
     else:
@@ -36,6 +37,8 @@ def _pad(x, lens):
     Returns:
         A np.array of shape (n, t, d), where t = min(max_length, max(lens))
     """
+    #print("lens",lens,"x",x)
+    #print("x",x)
     n = len(x)
     t = max(lens)
     d = 1 if x[0].ndim == 1 else x[0].shape[1]
@@ -45,6 +48,7 @@ def _pad(x, lens):
             ret[i, :lens[i]] = xx[:lens[i], np.newaxis]
     else:
         for i, xx in enumerate(x):
+            #print("i",i,"xx",xx)
             ret[i, :lens[i]] = xx[:lens[i]]
     return ret
 
@@ -58,7 +62,11 @@ def _rescale(x, mean, std):
     Returns:
         Same shape as x with rescaled values.
     """
-    return np.asarray([(xx - mean[np.newaxis, :]) / std[np.newaxis, :] for xx in x])
+    #print('len(x)',len(x))
+    ret = np.asarray([(xx - mean[np.newaxis, :]) / std[np.newaxis, :] for xx in x])
+    #ret2 = (x-mean)/std
+    #print(ret2)
+    return ret
 
 
 class DataHandler(object):
@@ -125,8 +133,11 @@ class DataHandler(object):
                 batch_from = 0
                 while batch_from < folds:
                     batch_fold = fold[batch_from:batch_from + batch_size]
+                    #print("batch_fold",batch_fold)
                     inputs = [self._data[s][batch_fold] for s
                               in ['input', 'masking', 'timestamp']]
+                    ### TEST
+                    inputs[2] = [inputs[2]]
                     inputs[0] = _rescale(inputs[0], mean, std)
                     lens = _filter(inputs[2], self._max_timestamp, self._max_steps)
                     inputs = [_pad(x, lens) for x in inputs]
