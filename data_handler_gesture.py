@@ -101,8 +101,9 @@ def _rescale(x, mean, std):
     Returns:
         Same shape as x with rescaled values.
     """
-    ret = (x - mean[np.newaxis, :]) / std[np.newaxis, :]
-    #ret = np.asarray([(xx - mean[np.newaxis, :]) / std[np.newaxis, :] for xx in x])
+    
+    #ret = (x - mean[np.newaxis, :]) / std[np.newaxis, :]
+    ret = np.asarray([(xx - mean[np.newaxis, :]) / std[np.newaxis, :] for xx in x])
     assert x.shape == ret.shape
     return ret
 
@@ -150,6 +151,8 @@ class DataHandler(object):
             self._output_dim = 1
         else:
             self._output_dim = self._data['label'].shape[-1]
+        print('self._input_dim',self._input_dim)
+        print('self._output_dim',self._output_dim)
         self._output_activation = 'sigmoid'
         self._loss_function = 'binary_crossentropy'
         self._folds = self._data['fold'].shape[0]

@@ -112,6 +112,8 @@ class DataHandler(object):
             self._output_dim = 1
         else:
             self._output_dim = self._data['label'].shape[-1]
+        print("self._input_dim:{}".format(self._input_dim))
+        print("self._output_dim:{}".format(self._output_dim))
         self._output_activation = 'sigmoid'
         self._loss_function = 'binary_crossentropy'
         self._folds = self._data['fold'].shape[0]
@@ -132,48 +134,22 @@ class DataHandler(object):
         folds = np.asarray([len(fold[k])for k in range(self._nbFile)])
 
         def _generator():
-            while True:
-                if shuffle:
-                    np.random.shuffle(fold)
-                #batch_from = 0
-                #batch_size = 
-                #print("fold",fold)
-                #print("folds",folds)
-                #while batch_from < folds:
-                batch_fold = fold
-
-                inputs = np.asarray([np.asarray([self._data[s][k][batch_fold[k]] for k in range(self._nbFile)]) for s in ['input', 'masking', 'timestamp']])
-                inputs[0] = _rescale(inputs[0], mean, std)
-                lens = _filter(inputs[2], self._max_timestamp, self._max_steps)
-                #print("inputs[0][0].shape",inputs[0][0].shape)
-                inputs = [_pad(x, lens)for x in inputs]
-                #inputs = [[_pad(x[k], lens) for k in range(self._nbFile)]for x in inputs]
-                targets = [self._data['label'][k][batch_fold[k]]for k in range(self._nbFile)]
-                
-                
-                '''
-                print("inputs[0][0].shape",inputs[0][0].shape)
-                print("inputs[1].shape",inputs[1].shape)
-                print("inputs[2].shape",inputs[2].shape)
-                print("targets[0].shape",np.asarray(targets[0]).shape)
-                print("batch_fold[0].shape",np.asarray(batch_fold[0]).shape)
-                '''
-                print("i:{},i_fold:{},{}".format(i,i_fold,np.asarray(targets[0]).shape))
-                #print("batch_fold",batch_fold)
-                #print("fold",fold)
-                #print("batch_from",batch_from)
-                #print("batch_size",batch_size)
-                '''
-                ### TEST
-                _inputs = [inputs[s][0] for s in range(3)]
-                #_inputs = _inputs[np.newaxis, :]
-                _targets = targets[0]
-                '''
-                print(targets[0])
-                yield (inputs, targets)
-                #yield (inputs, targets)
-                #batch_from += batch_size
-                #print('.', end='')
+            #while True:
+            if shuffle:
+                np.random.shuffle(fold)
+            batch_fold = fold
+            inputs = np.asarray([np.asarray([self._data[s][k][batch_fold[k]] for k in range(self._nbFile)]) for s in ['input', 'masking', 'timestamp']])
+            inputs[0] = _rescale(inputs[0], mean, std)
+            lens = _filter(inputs[2], self._max_timestamp, self._max_steps)
+            #print("inputs[0][0].shape",inputs[0][0].shape)
+            inputs = [_pad(x, lens)for x in inputs]
+            #inputs = [[_pad(x[k], lens) for k in range(self._nbFile)]for x in inputs]
+            targets = [self._data['label'][k][batch_fold[k]]for k in range(self._nbFile)]
+            print("i:{},i_fold:{}".format(i,i_fold))
+            print("inputs[0].shape",inputs[0].shape)
+            print("targets.shape", np.asarray(targets).shape[0], np.asarray(targets[0]).shape[0])
+            yield (inputs, targets)
+            
         # end of `_generator()`
 
         def _inputs_generator():

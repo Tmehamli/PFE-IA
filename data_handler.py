@@ -136,8 +136,6 @@ class DataHandler(object):
                     #print("batch_fold",batch_fold)
                     inputs = [self._data[s][batch_fold] for s
                               in ['input', 'masking', 'timestamp']]
-                    ### TEST
-                    inputs[2] = [inputs[2]]
                     inputs[0] = _rescale(inputs[0], mean, std)
                     lens = _filter(inputs[2], self._max_timestamp, self._max_steps)
                     inputs = [_pad(x, lens) for x in inputs]
