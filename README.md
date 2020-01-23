@@ -6,7 +6,8 @@
             -Algo de récupération des timestamp à partir des images-ID (date et heure de prise de la mesure) :convertion en timestamp
             -Cas où les images-ID sont manquants : calcul d'un delta =0.37 l'intervalle de temps entre deux mesures
             -Dataframe ok avec l'ensemble des données entrantes pour le réseau
-#cellule 4: 
+            
+#cellule 4: On tronque les valeurs des timestamp qui s'avèrent trop longues.
 
 #cellule 5 : Création du mask à partir du dataframe : 
 def create_mask : 
