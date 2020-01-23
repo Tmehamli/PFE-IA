@@ -30,7 +30,9 @@ Vérification si le répertoire de sauvegarde et bien crée ou non.
 
 #Cellule 10: Création du processed_fold : 
 Initialisation des vecteurs processed_fold et processed_stats.
+
 processed_fold : correspond à la structure contenant les données d'apprentissage, où n_samples est le nombre d'échantillons et n_features est le nombre d'entités et le nombre d'échantillonnage.
+
 processed_stats : correspond au données statistiques, soit la moyenne et l'écartype des échantillons.
 
 
