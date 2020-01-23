@@ -4,7 +4,7 @@
 #cellule 3 : -Lecture du fichier .json
             -Création du dataframe à partir des données lues depuis le fichier json
             -Algo de récupération des timestamp à partir des images-ID (date et heure de prise de la mesure) :convertion en timestamp
-            -Cas où les images-ID sont manquants : calcul d'un delta =0.37 l'intervalle de temps entre deux mesures
+            -Cas où les images-ID sont manquants : calcul d'un delta =0.87 l'intervalle de temps entre deux mesures
             -Dataframe ok avec l'ensemble des données entrantes pour le réseau
             
 #cellule 4: On tronque les valeurs des timestamp qui s'avèrent trop longues.
