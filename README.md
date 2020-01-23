@@ -1,6 +1,8 @@
 # PFE-IA
-#cellule 1 : importation des librairies nécessaire(numpy, pandas, csv, json...)
+#cellule 1 : importation des librairies nécessaire(numpy, pandas, csv, json...)\\  
+
 #cellule 2 : chemin du répertoir DATA
+  
 #cellule 3 : -Lecture du fichier .json
             -Création du dataframe à partir des données lues depuis le fichier json
             -Algo de récupération des timestamp à partir des images-ID (date et heure de prise de la mesure) :convertion en timestamp
