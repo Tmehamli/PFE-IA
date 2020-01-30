@@ -1,12 +1,14 @@
 from __future__ import absolute_import, division, print_function
 
-from keras import backend as K
-from keras import constraints, initializers, regularizers
-from keras.engine import InputSpec, Layer
-from keras.layers.recurrent import _generate_dropout_mask
-from keras.layers.recurrent import GRU, GRUCell, RNN
-from keras.layers.wrappers import Bidirectional
-from keras.utils.generic_utils import has_arg, serialize_keras_object
+
+
+
+from tensorflow.keras import constraints, initializers, regularizers
+from tensorflow.keras.layers import InputSpec, Layer
+from tensorflow.keras.layers import _generate_dropout_mask
+from tensorflow.keras.layers import GRU, GRUCell, RNN
+from tensorflow.keras.layers import Bidirectional
+from keras.utils import has_arg, serialize_keras_object
 
 from .activations import get_activation
 
