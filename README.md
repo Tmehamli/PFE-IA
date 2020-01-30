@@ -27,7 +27,7 @@ conda install -c anaconda seaborn
 ## Reference
 Zhengping Che, Sanjay Purushotham, Kyunghyun Cho, David Sontag, and Yan Liu. ["Recurrent Neural Networks for Multivariate Time Series with Missing Values"](https://www.nature.com/articles/s41598-018-24271-9), Scientific Reports (SREP), 8(1):6085, 2018.
 
-An earlier version is available on arXiv ([arXiv preprint arXiv:1606.01865](https://arxiv.org/abs/1606.01865)).
+An earlier version is available on arXiv ([arXiv preprint arXiv:1606.01865](https://arxiv.org/abs/1606.01865)).<br>
 [GRU-D](https://github.com/PeterChe1990/GRU-D)
 
 ## Requirements
